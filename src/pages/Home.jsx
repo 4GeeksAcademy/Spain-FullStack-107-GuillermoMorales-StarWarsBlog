@@ -1,157 +1,184 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import CardList from "../components/CardList.jsx";
 
 export const Home = () => {
-	const { store, dispatch } = useGlobalReducer();
+  const { store, dispatch } = useGlobalReducer();
 
-	// Obtener personajes con detalles
-	useEffect(() => {
-		fetch("https://www.swapi.tech/api/people")
-			.then((response) => response.json())
-			.then((data) => {
-				const fetchDetails = data.results.map((character) =>
-					fetch(character.url)
-						.then((res) => res.json())
-						.then((detail) => detail.result.properties)
-				);
-				Promise.all(fetchDetails).then((charactersDetailed) => {
-					dispatch({ type: "setCharacters", payload: charactersDetailed });
-				});
-			})
-			.catch((error) => console.error("Error fetching characters:", error));
-	}, [dispatch]);
+  // Estados de carga y error para cada recurso
+  const [loadingCharacters, setLoadingCharacters] = useState(false);
+  const [errorCharacters, setErrorCharacters] = useState(null);
 
-	// Obtener planetas con detalles
-	useEffect(() => {
-		fetch("https://www.swapi.tech/api/planets")
-			.then((response) => response.json())
-			.then((data) => {
-				const fetchDetails = data.results.map((planet) =>
-					fetch(planet.url)
-						.then((res) => res.json())
-						.then((detail) => detail.result.properties)
-				);
-				Promise.all(fetchDetails).then((planetsDetailed) => {
-					dispatch({ type: "setPlanets", payload: planetsDetailed });
-				});
-			})
-			.catch((error) => console.error("Error fetching planets:", error));
-	}, [dispatch]);
+  const [loadingPlanets, setLoadingPlanets] = useState(false);
+  const [errorPlanets, setErrorPlanets] = useState(null);
 
-	// Obtener vehículos con detalles
-	useEffect(() => {
-		fetch("https://www.swapi.tech/api/vehicles")
-			.then((response) => response.json())
-			.then((data) => {
-				const fetchDetails = data.results.map((vehicle) =>
-					fetch(vehicle.url)
-						.then((res) => res.json())
-						.then((detail) => detail.result.properties)
-				);
-				Promise.all(fetchDetails).then((vehiclesDetailed) => {
-					dispatch({ type: "setVehicles", payload: vehiclesDetailed });
-				});
-			})
-			.catch((error) => console.error("Error fetching vehicles:", error));
-	}, [dispatch]);
+  const [loadingVehicles, setLoadingVehicles] = useState(false);
+  const [errorVehicles, setErrorVehicles] = useState(null);
 
-	return (
-		<>
-			<div className="text-center mt-5">
-				<h1>Lista de Star Wars</h1>
-			</div>
+  useEffect(() => {
+    setLoadingCharacters(true);
+    setErrorCharacters(null);
 
-			<div>
-				<h2 className="mt-5 text-danger text-decoration-underline">Personajes :</h2>
-				{store.characters.length === 0 ? (
-					<p>Cargando personajes...</p>
-				) : (
-					<div className="cards-container" style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-						{store.characters.map((character, index) => (
-							<div
-								key={index}
-								className="card"
-								style={{
-									border: "1px solid #ccc",
-									borderRadius: "8px",
-									padding: "1rem",
-									width: "200px",
-								}}
-							>
-								<h3><u>{character.name}</u></h3>
-								<p><strong>Género:</strong> {character.gender}</p>
-								<p><strong>Color de pelo:</strong> {character.hair_color}</p>
-								<p><strong>Color de ojos:</strong> {character.eye_color}</p>
-								<div className="mt-auto">
-									<button className="btn btn-primary">Ver más detalles...</button>
-									
-								</div>
-							</div>
-						))}
-					</div>
-				)}
-			</div>
+    fetch("https://www.swapi.tech/api/people")
+      .then((response) => {
+        if (!response.ok) throw new Error("Error al cargar personajes");
+        return response.json();
+      })
+      .then((data) => {
+        if (!data.results) throw new Error("No se encontraron personajes");
 
-			<div>
-				<h2 className="mt-5 text-danger text-decoration-underline">Planetas :</h2>
-				{store.planets.length === 0 ? (
-					<p>Cargando planetas...</p>
-				) : (
-					<div className="cards-container" style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-						{store.planets.map((planet, index) => (
-							<div
-								key={index}
-								className="card"
-								style={{
-									border: "1px solid #ccc",
-									borderRadius: "8px",
-									padding: "1rem",
-									width: "200px",
-								}}
-							>
-								<h3><u>{planet.name}</u></h3>
-								<p><strong>Clima:</strong> {planet.climate}</p>
-								<p><strong>Terreno:</strong> {planet.terrain}</p>
-								<p><strong>Población:</strong> {planet.population}</p>
-								<div className="mt-auto">
-									<button className="btn btn-primary">Ver más detalles...</button>
-								</div>
-							</div>
-						))}
-					</div>
-				)}
-			</div>
+        const fetchDetails = data.results.map((character) =>
+          fetch(character.url)
+            .then((res) => {
+              if (!res.ok) throw new Error("Error al cargar detalle personaje");
+              return res.json();
+            })
+            .then((detail) => ({
+              uid: character.uid,
+              name: character.name,
+              ...detail.result.properties,
+            }))
+        );
 
-			<div>
-				<h2 className="mt-5 text-danger text-decoration-underline">Vehículos :</h2>
-				{store.vehicles.length === 0 ? (
-					<p>Cargando vehículos...</p>
-				) : (
-					<div className="cards-container" style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-						{store.vehicles.map((vehicle, index) => (
-							<div
-								key={index}
-								className="card"
-								style={{
-									border: "1px solid #ccc",
-									borderRadius: "8px",
-									padding: "1rem",
-									width: "200px",
-								}}
-							>
-								<h3><u>{vehicle.name}</u></h3>
-								<p><strong>Modelo:</strong> {vehicle.model}</p>
-								<p><strong>Clase:</strong> {vehicle.vehicle_class}</p>
-								<p><strong>Capacidad:</strong> {vehicle.cargo_capacity}</p>
-								<div className="mt-auto">
-									<button className="btn btn-primary">Ver más detalles...</button>
-									
-								</div>
-							</div>
-						))}
-					</div>
-				)}
-			</div>
-		</>
-	);
+        Promise.all(fetchDetails)
+          .then((charactersDetailed) => {
+            dispatch({ type: "setCharacters", payload: charactersDetailed });
+            setLoadingCharacters(false);
+          })
+          .catch((e) => {
+            setErrorCharacters(e.message);
+            setLoadingCharacters(false);
+          });
+      })
+      .catch((e) => {
+        setErrorCharacters(e.message);
+        setLoadingCharacters(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    setLoadingPlanets(true);
+    setErrorPlanets(null);
+
+    fetch("https://www.swapi.tech/api/planets")
+      .then((response) => {
+        if (!response.ok) throw new Error("Error al cargar planetas");
+        return response.json();
+      })
+      .then((data) => {
+        if (!data.results) throw new Error("No se encontraron planetas");
+
+        const fetchDetails = data.results.map((planet) =>
+          fetch(planet.url)
+            .then((res) => {
+              if (!res.ok) throw new Error("Error al cargar detalle planeta");
+              return res.json();
+            })
+            .then((detail) => ({
+              uid: planet.uid,
+              name: planet.name,
+              ...detail.result.properties,
+            }))
+        );
+
+        Promise.all(fetchDetails)
+          .then((planetsDetailed) => {
+            dispatch({ type: "setPlanets", payload: planetsDetailed });
+            setLoadingPlanets(false);
+          })
+          .catch((e) => {
+            setErrorPlanets(e.message);
+            setLoadingPlanets(false);
+          });
+      })
+      .catch((e) => {
+        setErrorPlanets(e.message);
+        setLoadingPlanets(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    setLoadingVehicles(true);
+    setErrorVehicles(null);
+
+    fetch("https://www.swapi.tech/api/vehicles")
+      .then((response) => {
+        if (!response.ok) throw new Error("Error al cargar vehículos");
+        return response.json();
+      })
+      .then((data) => {
+        if (!data.results) throw new Error("No se encontraron vehículos");
+
+        const fetchDetails = data.results.map((vehicle) =>
+          fetch(vehicle.url)
+            .then((res) => {
+              if (!res.ok) throw new Error("Error al cargar detalle vehículo");
+              return res.json();
+            })
+            .then((detail) => ({
+              uid: vehicle.uid,
+              name: vehicle.name,
+              ...detail.result.properties,
+            }))
+        );
+
+        Promise.all(fetchDetails)
+          .then((vehiclesDetailed) => {
+            dispatch({ type: "setVehicles", payload: vehiclesDetailed });
+            setLoadingVehicles(false);
+          })
+          .catch((e) => {
+            setErrorVehicles(e.message);
+            setLoadingVehicles(false);
+          });
+      })
+      .catch((e) => {
+        setErrorVehicles(e.message);
+        setLoadingVehicles(false);
+      });
+  }, []);
+
+  const characters = Array.isArray(store.characters) ? store.characters : [];
+  const planets = Array.isArray(store.planets) ? store.planets : [];
+  const vehicles = Array.isArray(store.vehicles) ? store.vehicles : [];
+
+  return (
+    <>
+      <div className="text-center mt-5">
+        <h1>Lista de Star Wars</h1>
+      </div>
+
+      {loadingCharacters ? (
+        <p>Cargando personajes...</p>
+      ) : errorCharacters ? (
+        <p style={{ color: "red" }}>Error: {errorCharacters}</p>
+      ) : (
+        <CardList
+          title="Personajes"
+          items={characters}
+          type="characters"
+          useFavorites={true}
+          showLearnMore={true}
+        />
+      )}
+
+      {loadingPlanets ? (
+        <p>Cargando planetas...</p>
+      ) : errorPlanets ? (
+        <p style={{ color: "red" }}>Error: {errorPlanets}</p>
+      ) : (
+        <CardList title="Planetas" items={planets} type="planets" />
+      )}
+
+      {loadingVehicles ? (
+        <p>Cargando vehículos...</p>
+      ) : errorVehicles ? (
+        <p style={{ color: "red" }}>Error: {errorVehicles}</p>
+      ) : (
+        <CardList title="Vehículos" items={vehicles} type="vehicles" />
+      )}
+
+      
+    </>
+  );
 };
