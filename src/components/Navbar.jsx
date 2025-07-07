@@ -3,10 +3,14 @@ import useGlobalReducer from "../hooks/useGlobalReducer"; // importa tu hook par
 import { useState } from "react";
 
 export const Navbar = () => {
-  const { store } = useGlobalReducer();
+  const { store, dispatch } = useGlobalReducer();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+
+  const handleRemoveFavorite = (uid, type) => {
+    dispatch({ type: "removeFromFavorites", payload: { uid, type } });
+  };
 
   return (
     <nav className="navbar navbar-light bg-light">
@@ -39,8 +43,16 @@ export const Navbar = () => {
                 else if (fav.type === "planets") path = `/planet-details/${fav.uid}`;
                 else if (fav.type === "vehicles") path = `/vehicle-details/${fav.uid}`;
                 return (
-                  <li key={fav.uid + fav.type}>
+                  <li key={fav.uid + fav.type} className="dropdown-item d-flex justify-content-between align-items-center">
                     <Link to={path}>{fav.name}</Link>
+                    <button
+                      className="btn btn-link btn-sm text-danger ms-2 p-0"
+                      title="Eliminar de favoritos"
+                      onClick={() => handleRemoveFavorite(fav.uid, fav.type)}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <i className="fa-solid fa-trash"></i>
+                    </button>
                   </li>
                 );
               })

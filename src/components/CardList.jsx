@@ -5,16 +5,15 @@ import useGlobalReducer from "../hooks/useGlobalReducer";
 const CardList = ({ title, items, type, useFavorites = false, showLearnMore = false }) => {
   const { store, dispatch } = useGlobalReducer();
 
-  // Funciones para favoritos, solo si useFavorites=true
-  const isFavorite = (uid) => store.favorites.some(fav => fav.uid === uid);
+  const isFavorite = (uid) => store.favorites.some(fav => fav.uid === uid && fav.type === type);
 
   const toggleFavorite = (item) => {
-  if (isFavorite(item.uid)) {
-    dispatch({ type: "removeFromFavorites", payload: { uid: item.uid, type } });
-  } else {
-    dispatch({ type: "addToFavorites", payload: { uid: item.uid, name: item.name, type } });
-  }
-};
+    if (isFavorite(item.uid)) {
+      dispatch({ type: "removeFromFavorites", payload: { uid: item.uid, type } });
+    } else {
+      dispatch({ type: "addToFavorites", payload: { uid: item.uid, name: item.name, type } });
+    }
+  };
 
   if (!Array.isArray(items) || items.length === 0) {
     return (
@@ -31,7 +30,7 @@ const CardList = ({ title, items, type, useFavorites = false, showLearnMore = fa
       <div className="cards-container" style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
         {items.map((item) => (
           <div
-            key={item.uid || item.name} // uid preferido para key
+            key={item.uid || item.name}
             className="card"
             style={{
               border: "1px solid #ccc",
@@ -44,7 +43,6 @@ const CardList = ({ title, items, type, useFavorites = false, showLearnMore = fa
             }}
           >
             <h3><u>{item.name}</u></h3>
-            {/* Renderizado específico según tipo */}
             {type === "characters" && (
               <>
                 <p><strong>Género:</strong> {item.gender}</p>
@@ -83,7 +81,7 @@ const CardList = ({ title, items, type, useFavorites = false, showLearnMore = fa
                   Ver más detalles...
                 </Link>
               )}
-              {useFavorites && type === "characters" && (
+              {useFavorites && (
                 <button
                   className="btn btn-light btn-favorite"
                   onClick={() => toggleFavorite(item)}
@@ -103,4 +101,35 @@ const CardList = ({ title, items, type, useFavorites = false, showLearnMore = fa
   );
 };
 
+const Characters = ({ characters }) => (
+  <CardList
+    title="Personajes"
+    items={characters}
+    type="characters"
+    useFavorites={true}
+    showLearnMore={true}
+  />
+);
+
+const Planets = ({ planets }) => (
+  <CardList
+    title="Planetas"
+    items={planets}
+    type="planets"
+    useFavorites={true}
+    showLearnMore={true}
+  />
+);
+
+const Vehicles = ({ vehicles }) => (
+  <CardList
+    title="Vehículos"
+    items={vehicles}
+    type="vehicles"
+    useFavorites={true}
+    showLearnMore={true}
+  />
+);
+
+export { Characters, Planets, Vehicles };
 export default CardList;

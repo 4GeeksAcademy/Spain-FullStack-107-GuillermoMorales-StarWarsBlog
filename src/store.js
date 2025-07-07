@@ -1,35 +1,51 @@
-export const initialStore = () => {
-  return {
-    characters: [],
-    planets: [],
-    vehicles: []
-  };
-};
+import { PlanetDetails } from "./pages/PlanetDetails";
+
+// Estado inicial de la tienda global
+export const initialStore = () => ({
+  characters: [],
+  planets: [],
+  vehicles: [],
+  favorites: [],
+  todos: []
+});
 
 export default function storeReducer(store, action = {}) {
-  switch (action.type) {
+  const { type, payload } = action;
+
+  switch (type) {
+
+    case 'setTodos':
+      return { ...store, todos: payload };
+
+
     case 'setCharacters':
-      return {
-        ...store,
-        characters: action.payload
-      };
+      return { ...store, characters: payload };
 
     case 'setPlanets':
-      return {
-        ...store,
-        planets: action.payload
-      };
+      return { ...store, planets: payload };
 
     case 'setVehicles':
+      return { ...store, vehicles: payload };
+
+    case 'addToFavorites': {
+      const { uid, name, type } = payload;
+      const alreadyExists = store.favorites.some(fav => fav.uid === uid && fav.type === type);
+      if (alreadyExists) return store;
       return {
         ...store,
-        vehicles: action.payload
+        favorites: [...store.favorites, { uid, name, type }]
+      };
+    }
+
+    case 'removeFromFavorites':
+      return {
+        ...store,
+        favorites: store.favorites.filter(
+          fav => !(fav.uid === payload.uid && fav.type === payload.type)
+        )
       };
 
-
-    case 'add'
-
     default:
-      throw Error('Unknown action.');
+      throw new Error('Unknown action type: ');
   }
 }

@@ -27,7 +27,8 @@ export const Home = () => {
       .then((data) => {
         if (!data.results) throw new Error("No se encontraron personajes");
 
-        const fetchDetails = data.results.map((character) =>
+        // Limita a los primeros 10 para evitar error 429
+        const fetchDetails = data.results.slice(0, 10).map((character) =>
           fetch(character.url)
             .then((res) => {
               if (!res.ok) throw new Error("Error al cargar detalle personaje");
@@ -36,6 +37,7 @@ export const Home = () => {
             .then((detail) => ({
               uid: character.uid,
               name: character.name,
+              description: detail.result.description || "Sin descripción disponible",
               ...detail.result.properties,
             }))
         );
@@ -68,7 +70,8 @@ export const Home = () => {
       .then((data) => {
         if (!data.results) throw new Error("No se encontraron planetas");
 
-        const fetchDetails = data.results.map((planet) =>
+        // Limita a los primeros 10 para evitar error 429
+        const fetchDetails = data.results.slice(0, 10).map((planet) =>
           fetch(planet.url)
             .then((res) => {
               if (!res.ok) throw new Error("Error al cargar detalle planeta");
@@ -77,6 +80,7 @@ export const Home = () => {
             .then((detail) => ({
               uid: planet.uid,
               name: planet.name,
+              description: detail.result.description || "Sin descripción disponible",
               ...detail.result.properties,
             }))
         );
@@ -109,7 +113,8 @@ export const Home = () => {
       .then((data) => {
         if (!data.results) throw new Error("No se encontraron vehículos");
 
-        const fetchDetails = data.results.map((vehicle) =>
+        // Limita a los primeros 10 para evitar error 429
+        const fetchDetails = data.results.slice(0, 10).map((vehicle) =>
           fetch(vehicle.url)
             .then((res) => {
               if (!res.ok) throw new Error("Error al cargar detalle vehículo");
@@ -118,6 +123,7 @@ export const Home = () => {
             .then((detail) => ({
               uid: vehicle.uid,
               name: vehicle.name,
+              description: detail.result.description || "Sin descripción disponible",
               ...detail.result.properties,
             }))
         );
@@ -167,7 +173,13 @@ export const Home = () => {
       ) : errorPlanets ? (
         <p style={{ color: "red" }}>Error: {errorPlanets}</p>
       ) : (
-        <CardList title="Planetas" items={planets} type="planets" />
+        <CardList
+          title="Planetas"
+          items={planets}
+          type="planets"
+          useFavorites={true}
+          showLearnMore={true}
+        />
       )}
 
       {loadingVehicles ? (
@@ -175,10 +187,14 @@ export const Home = () => {
       ) : errorVehicles ? (
         <p style={{ color: "red" }}>Error: {errorVehicles}</p>
       ) : (
-        <CardList title="Vehículos" items={vehicles} type="vehicles" />
+        <CardList
+          title="Vehículos"
+          items={vehicles}
+          type="vehicles"
+          useFavorites={true}
+          showLearnMore={true}
+        />
       )}
-
-      
     </>
   );
 };

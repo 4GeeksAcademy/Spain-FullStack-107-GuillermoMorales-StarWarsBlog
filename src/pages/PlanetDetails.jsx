@@ -10,12 +10,17 @@ export function PlanetDetails() {
   if (!planet) return <p>No se encontró el planeta.</p>;
 
   return (
-    <div>
-      <h2>{planet.name}</h2>
-      <p><strong>Clima:</strong> {planet.climate}</p>
-      <p><strong>Terreno:</strong> {planet.terrain}</p>
-      <p><strong>Población:</strong> {planet.population}</p>
-      {/* Agrega más detalles si lo deseas */}
+    <div className="d-flex align-items-center flex-column">
+      <h2 className="fs-2 text-decoration-underline text-success">{planet.name}</h2>
+      <div className="d-flex text-start w-75 p-3 bg-light rounded shadow mb-3 justify-content-between mt-5 ">
+        <p><strong>Clima:</strong> {planet.climate} <i class="fa-solid fa-cloud-bolt"></i></p>
+        <p><strong>Terreno:</strong> {planet.terrain} <i class="fa-solid fa-mountain-sun"></i></p>
+        <p><strong>Población:</strong> {planet.population} <i class="fa-solid fa-person-arrow-up-from-line"></i></p>
+        <p><strong>Gravedad:</strong> {planet.gravity} <i class="fa-solid fa-globe"></i></p>
+        <p><strong>Periodo de rotación:</strong> {planet.rotation_period} horas <i class="fa-solid fa-rotate"></i></p>
+        <p><strong>Periodo orbital:</strong> {planet.orbital_period} días <i class="fa-solid fa-satellite"></i></p>
+        <p><strong>Diámetro:</strong> {planet.diameter} km <i class="fa-regular fa-circle"></i></p>
+      </div>
     </div>
   );
 }
